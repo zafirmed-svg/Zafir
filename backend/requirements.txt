@@ -1,0 +1,9 @@
+Django
+djangorestframework
+mysqlclient
+pdfplumber
+python-dotenv
+gunicorn
+whitenoise
+psycopg2-binary
+dj-database-url

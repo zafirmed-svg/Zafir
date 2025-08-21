@@ -16,7 +16,7 @@ import { Checkbox } from "./components/ui/checkbox";
 import { Progress } from "./components/ui/progress";
 import { CalendarIcon, DollarSign, FileText, Plus, Search, TrendingUp, Users, Clock, Calculator, Package, Heart, Stethoscope, Activity, Upload, FileUp, CheckCircle, XCircle } from "lucide-react";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 function App() {

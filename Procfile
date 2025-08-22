@@ -1,1 +1,1 @@
-web: cd backend && gunicorn -k uvicorn.workers.UvicornWorker -w 4 main:app -b 0.0.0.0:$PORT
+web: cd backend && PYTHONPATH=. gunicorn -c gunicorn_config.py main:app

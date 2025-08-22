@@ -3,11 +3,9 @@ services:
   - type: web
     name: zafir-backend
     env: python
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && gunicorn -c gunicorn_config.py main:app
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd backend && PYTHONPATH=. gunicorn -c gunicorn_config.py main:app
     envVars:
-      - key: PYTHONPATH
-        value: backend
       - key: PORT
         value: 8000
       - key: ENVIRONMENT

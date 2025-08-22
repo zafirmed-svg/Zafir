@@ -1,37 +1,28 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Instalar dependencias del sistema necesarias
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Configurar pip para usar mirrors alternativos y timeout más largo
+ENV PIP_DEFAULT_TIMEOUT=100 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1
 
-# Copiar y instalar requerimientos
-COPY backend/requirements.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Crear usuario no root
-RUN useradd -m -r appuser && \
-    chown -R appuser:appuser /app
+# Instalar dependencias
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar el código de la aplicación
 COPY backend/ .
-RUN chown -R appuser:appuser /app
 
-# Cambiar al usuario no root
+# Crear y cambiar al usuario no root
+RUN useradd -m -r appuser && \
+    chown -R appuser:appuser /app
 USER appuser
 
 # Variables de entorno
-ENV PORT=8000
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
-
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/ || exit 1
+ENV PORT=8000 \
+    PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1
 
 # Comando para iniciar la aplicación
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -54,11 +54,13 @@ frontend/
 
 ### Backend
 
+#### Desarrollo Local
+
 1. Crear un entorno virtual:
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-venv\\Scripts\\activate   # Windows
+venv\Scripts\activate     # Windows
 ```
 
 2. Instalar dependencias:
@@ -66,17 +68,46 @@ venv\\Scripts\\activate   # Windows
 pip install -r requirements.txt
 ```
 
-3. Configurar variables de entorno en `.env`:
-```env
-MONGO_URL=mongodb://localhost:27017
-DB_NAME=quotations
-CORS_ORIGINS=http://localhost:5173
+3. Copiar `.env.example` a `.env` y configurar las variables:
+```bash
+cp .env.example .env
 ```
 
 4. Ejecutar el servidor:
 ```bash
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
+
+#### Usando Docker
+
+1. Construir la imagen:
+```bash
+docker build -t zafir-api .
+```
+
+2. Ejecutar el contenedor:
+```bash
+docker run -p 8000:8000 --env-file .env zafir-api
+```
+
+### Despliegue en Render.com
+
+1. Crear una nueva Web Service en Render.com
+2. Conectar con el repositorio de GitHub
+3. Configurar las variables de entorno:
+   - `PORT`: 8000
+   - `ENVIRONMENT`: production
+   - `DATABASE_URL`: URL de tu base de datos
+   - `FRONTEND_URL`: URL de tu frontend en producción
+   - `SECRET_KEY`: Clave secreta para JWT
+4. Configurar el build command:
+   ```bash
+   pip install -r requirements.txt
+   ```
+5. Configurar el start command:
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port $PORT
+   ```
 
 ### Frontend
 

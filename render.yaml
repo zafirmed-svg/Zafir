@@ -3,14 +3,15 @@ services:
   - type: web
     name: zafir-backend
     env: python
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -c gunicorn_config.py
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && python render_app.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: PYTHONPATH
-        value: .
+        value: backend
+      - key: PORT
+        value: 5177
 
   # Frontend service
   - type: web

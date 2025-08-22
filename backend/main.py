@@ -15,20 +15,16 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
-# Set up logging
 import logging
 import os
-import sys
+from dotenv import load_dotenv
 
-# Add the backend directory to the Python path
-backend_dir = os.path.dirname(os.path.abspath(__file__))
-if backend_dir not in sys.path:
-    sys.path.append(backend_dir)
+# Load environment variables
+load_dotenv()
 
-# Configure logging based on environment
-log_level = logging.DEBUG if os.getenv("ENVIRONMENT") != "production" else logging.INFO
+# Configure logging
 logging.basicConfig(
-    level=log_level,
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)

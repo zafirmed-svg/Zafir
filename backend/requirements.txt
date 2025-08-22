@@ -1,10 +1,9 @@
 # Web framework and server
 fastapi==0.104.1
 uvicorn[standard]==0.23.2
-gunicorn==21.2.0
-httptools>=0.5.0
-uvloop>=0.17.0
-websockets>=10.4
+sqlalchemy==2.0.25
+python-dotenv==1.0.0
+pydantic==2.5.2
 
 # Database
 sqlalchemy>=2.0.25,<3.0.0

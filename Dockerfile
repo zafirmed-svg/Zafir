@@ -1,11 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.11.4-slim
 
 WORKDIR /app
 
-# Configurar pip para usar mirrors alternativos y timeout más largo
-ENV PIP_DEFAULT_TIMEOUT=100 \
+# Configurar pip y variables de entorno
+ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    PORT=8000
 
 # Instalar dependencias
 COPY backend/requirements.txt requirements.txt
@@ -17,14 +19,7 @@ COPY backend/ .
 # Crear y cambiar al usuario no root
 RUN useradd -m -r appuser && \
     chown -R appuser:appuser /app
-
-# Variables de entorno
-ENV PORT=8000 \
-    PYTHONPATH=/app \
-    PYTHONUNBUFFERED=1
-
-# Cambiar al usuario no root
 USER appuser
 
-# Comando para iniciar la aplicación con uvicorn directamente
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Comando para iniciar la aplicación
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,26 +1,24 @@
 # Core API
-fastapi==0.104.1
-uvicorn[standard]==0.23.2
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
 
 # Database
-sqlalchemy==2.0.25
-pymongo==4.5.0
+sqlalchemy==2.0.19
+pymongo==4.4.1
 
 # Environment and settings
 python-dotenv==0.21.1
-pydantic==2.6.4
-pydantic-settings==2.1.0
+pydantic==1.10.12  # Versión anterior que no requiere Rust
+pydantic-settings==2.0.3
 
 # Authentication
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-
-# Utilities
-python-multipart==0.0.9
-requests==2.31.0
-requests-oauthlib==2.0.0
 bcrypt==4.0.1
 
-# Email validation
-dnspython==2.4.2
-email-validator==2.1.0.post1
+# Utilities
+python-multipart==0.0.6
+requests==2.31.0
+requests-oauthlib==2.0.0
+email-validator==2.0.0
+dnspython==2.4.1

@@ -15,8 +15,14 @@ app = FastAPI()
 
 # Set up logging
 import logging
+import os
 
-logging.basicConfig(level=logging.DEBUG)
+# Configure logging based on environment
+log_level = logging.DEBUG if os.getenv("ENVIRONMENT") != "production" else logging.INFO
+logging.basicConfig(
+    level=log_level,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Signal handlers

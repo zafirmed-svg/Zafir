@@ -3,15 +3,14 @@ services:
   - type: web
     name: zafir-backend
     env: python
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && gunicorn -k uvicorn.workers.UvicornWorker -w 4 wsgi:app -b 0.0.0.0:$PORT
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -c gunicorn_config.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: ENVIRONMENT
-        value: production
       - key: PYTHONPATH
-        value: ./backend
+        value: .
 
   # Frontend service
   - type: web

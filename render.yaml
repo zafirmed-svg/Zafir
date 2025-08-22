@@ -3,7 +3,7 @@ services:
   - type: web
     name: zafir-backend
     env: python
-    buildCommand: cd backend && pip install -r requirements.txt
+    buildCommand: cd backend && chmod +x install.sh && ./install.sh
     startCommand: cd backend && python render_app.py
     envVars:
       - key: PYTHON_VERSION

@@ -3,18 +3,21 @@ services:
   - type: web
     name: zafir-backend
     env: python
-    buildCommand: pip install -r backend/requirements.txt
+    runtime: python3.11
+    buildCommand: |
+      python -m pip install --upgrade pip
+      pip install -r backend/requirements.txt
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
       - key: PYTHONPATH
         value: ./backend
       - key: PORT
         value: 8000
       - key: ENVIRONMENT
         value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
 
   # Frontend service
   - type: web

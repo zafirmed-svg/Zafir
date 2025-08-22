@@ -1,9 +1,18 @@
 # Web framework and server
 fastapi==0.104.1
 uvicorn[standard]==0.23.2
+
+# Database
 sqlalchemy==2.0.25
 python-dotenv==1.0.0
+
+# Data validation
 pydantic==2.5.2
+pydantic-settings==2.1.0
+
+# Production dependencies
+gunicorn==21.2.0
+python-multipart==0.0.9
 
 # Database
 sqlalchemy>=2.0.25,<3.0.0

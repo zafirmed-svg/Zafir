@@ -2,13 +2,11 @@ services:
   # Backend service
   - type: web
     name: zafir-backend
-    env: python
-    buildCommand: |
-      cd backend
-      pip install -r requirements.txt
-    startCommand: |
-      cd backend
-      uvicorn main:app --host 0.0.0.0 --port $PORT
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8000
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0

@@ -3,11 +3,11 @@ services:
   - type: web
     name: zafir-backend
     env: python
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && gunicorn wsgi:app -k uvicorn.workers.UvicornWorker -w 4 --bind 0.0.0.0:$PORT
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && gunicorn main:app -k uvicorn.workers.UvicornWorker -w 4 --bind 0.0.0.0:$PORT --preload
     envVars:
       - key: PYTHONPATH
-        value: ./backend
+        value: .
       - key: PORT
         value: 8000
       - key: ENVIRONMENT

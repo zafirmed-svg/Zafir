@@ -3,17 +3,13 @@ services:
   - type: web
     name: zafir-backend
     env: python
-    buildCommand: "./build.sh"
-    startCommand: "./backend/start.sh"
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: bash render_start.sh
     envVars:
-      - key: PORT
-        value: 8000
-      - key: ENVIRONMENT
-        value: production
       - key: PYTHON_VERSION
         value: 3.11.4
-      - key: PYTHONPATH
-        value: /opt/render/project/src/backend
+      - key: ENVIRONMENT
+        value: production
     healthCheckPath: /
 
   # Frontend service

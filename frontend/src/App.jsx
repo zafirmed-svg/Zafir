@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { quoteService } from "./services/api";
 import "./App.css";
 import axios from "axios";
 import { Button } from "./components/ui/button";
@@ -16,10 +17,23 @@ import { Checkbox } from "./components/ui/checkbox";
 import { Progress } from "./components/ui/progress";
 import { CalendarIcon, DollarSign, FileText, Plus, Search, TrendingUp, Users, Clock, Calculator, Package, Heart, Stethoscope, Activity, Upload, FileUp, CheckCircle, XCircle } from "lucide-react";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Importar el cliente axios configurado
+import api from './services/api';
+
+// Función de utilidad para reintentos
+const withRetry = async (fn, maxRetries = 3, delay = 1000) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+    }
+  }
+};
 
 function App() {
+  // Inicializar todos los estados que son arrays como arrays vacíos
   const [quotes, setQuotes] = useState([]);
   const [filteredQuotes, setFilteredQuotes] = useState([]);
   const [procedures, setProcedures] = useState([]);
@@ -64,10 +78,22 @@ function App() {
   });
 
   useEffect(() => {
-    fetchDashboardData();
-    fetchQuotes();
-    fetchProcedures();
-    fetchSurgeons();
+    const initializeData = async () => {
+      try {
+        // Fetch datos en secuencia para evitar sobrecarga
+        await fetchDashboardData();
+        await new Promise(resolve => setTimeout(resolve, 100)); // Pequeño retraso
+        await fetchQuotes();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await fetchProcedures();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await fetchSurgeons();
+      } catch (error) {
+        console.error("Error initializing data:", error);
+      }
+    };
+
+    initializeData();
   }, []);
 
   useEffect(() => {
@@ -76,62 +102,118 @@ function App() {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get(`${API}/dashboard`);
-      setDashboardStats(response.data);
+      const response = await withRetry(() => api.get('/dashboard'));
+      // Asegurar que los datos tengan la estructura correcta
+      const defaultDashboardData = {
+        total_quotes: 0,
+        recent_quotes: [],
+        top_procedures: []
+      };
+      setDashboardStats({
+        ...defaultDashboardData,
+        ...(response.data || {})
+      });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      // Establecer datos por defecto en caso de error
+      setDashboardStats({
+        total_quotes: 0,
+        recent_quotes: [],
+        top_procedures: []
+      });
     }
   };
 
   const fetchQuotes = async () => {
     try {
-      const response = await axios.get(`${API}/quotes`);
-      setQuotes(response.data);
+      const response = await quoteService.getAll();
+      // Asegurarse de que response.data es un array
+      const quotesData = Array.isArray(response.data) ? response.data : [];
+      setQuotes(quotesData);
+      setFilteredQuotes(quotesData);
     } catch (error) {
-      console.error("Error fetching quotes:", error);
+      console.error('Error fetching quotes:', error);
+      // En caso de error, establecer arrays vacíos
+      setQuotes([]);
+      setFilteredQuotes([]);
+    }
+  };
+  
+  const handleCreateQuote = async (formData) => {
+    try {
+      const response = await quoteService.create(formData);
+      setQuotes(prev => [...prev, response.data]);
+      // Mostrar toast de éxito
+    } catch (error) {
+      // Mostrar toast de error
     }
   };
 
   const fetchProcedures = async () => {
     try {
-      const response = await axios.get(`${API}/procedures`);
-      setProcedures(response.data.procedures);
+      const response = await api.get('/procedures');
+      // Asegurarse de que procedures es un array
+      const proceduresData = Array.isArray(response.data?.procedures) ? response.data.procedures : [];
+      setProcedures(proceduresData);
     } catch (error) {
       console.error("Error fetching procedures:", error);
+      setProcedures([]); // Establecer array vacío en caso de error
     }
   };
 
   const fetchSurgeons = async () => {
     try {
-      const response = await axios.get(`${API}/surgeons`);
-      setSurgeons(response.data.surgeons);
+      const response = await api.get('/surgeons');
+      // Asegurarse de que surgeons es un array
+      const surgeonsData = Array.isArray(response.data?.surgeons) ? response.data.surgeons : [];
+      setSurgeons(surgeonsData);
     } catch (error) {
       console.error("Error fetching surgeons:", error);
+      setSurgeons([]); // Establecer array vacío en caso de error
     }
   };
 
   const fetchPricingSuggestions = async (procedureName) => {
-    if (!procedureName) return;
+    if (!procedureName || procedureName.length < 3) {
+      setPricingSuggestions(null);
+      return;
+    }
     try {
       setLoading(true);
-      const response = await axios.get(`${API}/pricing-suggestions/${procedureName}`);
-      setPricingSuggestions(response.data);
+      const response = await api.get(`/pricing-suggestions/${encodeURIComponent(procedureName)}`);
+      if (response.data) {
+        setPricingSuggestions(response.data);
+      } else {
+        setPricingSuggestions({
+          quote_count: 0,
+          avg_facility_fee: 0,
+          avg_equipment_costs: 0,
+          avg_total_cost: 0
+        });
+      }
     } catch (error) {
       console.error("Error fetching pricing suggestions:", error);
+      setPricingSuggestions({
+        quote_count: 0,
+        avg_facility_fee: 0,
+        avg_equipment_costs: 0,
+        avg_total_cost: 0
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const filterQuotes = () => {
-    let filtered = quotes;
+    let filtered = quotes || [];
     
     if (searchTerm) {
-      filtered = filtered.filter(quote => 
-        (quote.patient_id && quote.patient_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        quote.procedure_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (quote.surgeon_name && quote.surgeon_name.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
+      filtered = filtered.filter(quote => {
+        const patientIdMatch = quote.patient_id ? quote.patient_id.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+        const procedureMatch = quote.procedure_name ? quote.procedure_name.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+        const surgeonMatch = quote.surgeon_name ? quote.surgeon_name.toLowerCase().includes(searchTerm.toLowerCase()) : false;
+        return patientIdMatch || procedureMatch || surgeonMatch;
+      });
     }
     
     if (filterProcedure && filterProcedure !== "todos") {
@@ -146,8 +228,19 @@ function App() {
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Fetch pricing suggestions when procedure name changes
-    if (name === 'procedure_name' && value.length > 2) {
-      fetchPricingSuggestions(value);
+    if (name === 'procedure_name') {
+      // Limpiar sugerencias si el valor está vacío o es muy corto
+      if (!value || value.length < 3) {
+        setPricingSuggestions(null);
+        return;
+      }
+      // Usar un temporizador para evitar demasiadas llamadas
+      const timeoutId = setTimeout(() => {
+        fetchPricingSuggestions(value);
+      }, 300); // Esperar 300ms después de que el usuario deje de escribir
+      
+      // Limpiar el temporizador anterior
+      return () => clearTimeout(timeoutId);
     }
   };
 
@@ -184,7 +277,8 @@ function App() {
         }
       };
 
-      await axios.post(`${API}/quotes`, submitData);
+      // Enviar los datos
+      const response = await api.post('/quotes', submitData);
       setIsCreateDialogOpen(false);
       setFormData({
         patient_id: "",
@@ -238,7 +332,7 @@ function App() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.post(`${API}/upload-pdf`, formData, {
+      const response = await api.post('/upload-pdf', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -580,25 +674,35 @@ function App() {
                     </Card>
 
                     {/* Pricing Suggestions */}
-                    {pricingSuggestions && pricingSuggestions.quote_count > 0 && (
-                      <Alert className="border-blue-200 bg-blue-50">
+                    {pricingSuggestions && (
+                      <Alert className={pricingSuggestions.quote_count > 0 ? "border-blue-200 bg-blue-50" : "border-yellow-200 bg-yellow-50"}>
                         <Calculator className="h-4 w-4" />
                         <AlertDescription>
                           <div className="flex justify-between items-center">
-                            <div>
-                              <strong>Datos Históricos Disponibles:</strong> Basado en {pricingSuggestions.quote_count} procedimientos similares
-                              <br />
-                              Promedio Total: {formatCurrency(pricingSuggestions.avg_total_cost)}
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={applySuggestions}
-                              className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                            >
-                              Aplicar Sugerencias
-                            </Button>
+                            {pricingSuggestions.quote_count > 0 ? (
+                              <>
+                                <div>
+                                  <strong>Datos Históricos Disponibles:</strong> Basado en {pricingSuggestions.quote_count} procedimientos similares
+                                  <br />
+                                  Promedio Total: {formatCurrency(pricingSuggestions.avg_total_cost)}
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={applySuggestions}
+                                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                                >
+                                  Aplicar Sugerencias
+                                </Button>
+                              </>
+                            ) : (
+                              <div>
+                                <strong>No se encontraron datos históricos</strong>
+                                <br />
+                                <span className="text-sm text-slate-600">Esta será la primera cotización para este procedimiento</span>
+                              </div>
+                            )}
                           </div>
                         </AlertDescription>
                       </Alert>
@@ -849,7 +953,7 @@ function App() {
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
-            {dashboardStats && (
+            {dashboardStats && dashboardStats.recent_quotes && dashboardStats.top_procedures && (
               <>
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1035,13 +1139,13 @@ function App() {
                               Paquete Quirúrgico Incluido
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                              {quote.surgical_package.medications_included?.length > 0 && (
+                              {quote.surgical_package.medications_included && quote.surgical_package.medications_included.length > 0 && (
                                 <div>
                                   <span className="font-medium text-slate-700">Medicamentos:</span>
                                   <p className="text-slate-600">{quote.surgical_package.medications_included.join(', ')}</p>
                                 </div>
                               )}
-                              {quote.surgical_package.postoperative_care?.length > 0 && (
+                              {quote.surgical_package.postoperative_care && quote.surgical_package.postoperative_care.length > 0 && (
                                 <div>
                                   <span className="font-medium text-slate-700">Cuidados Postoperatorios:</span>
                                   <p className="text-slate-600">{quote.surgical_package.postoperative_care.join(', ')}</p>
@@ -1053,7 +1157,7 @@ function App() {
                                   <p className="text-slate-600">{quote.surgical_package.hospital_stay_nights} noches</p>
                                 </div>
                               )}
-                              {quote.surgical_package.special_equipment?.length > 0 && (
+                              {quote.surgical_package.special_equipment && quote.surgical_package.special_equipment.length > 0 && (
                                 <div>
                                   <span className="font-medium text-slate-700">Equipo Especial:</span>
                                   <p className="text-slate-600">{quote.surgical_package.special_equipment.join(', ')}</p>
@@ -1065,7 +1169,7 @@ function App() {
                                   <p className="text-slate-600">Incluido</p>
                                 </div>
                               )}
-                              {quote.surgical_package.additional_services?.length > 0 && (
+                              {quote.surgical_package.additional_services && quote.surgical_package.additional_services.length > 0 && (
                                 <div>
                                   <span className="font-medium text-slate-700">Servicios Adicionales:</span>
                                   <p className="text-slate-600">{quote.surgical_package.additional_services.join(', ')}</p>

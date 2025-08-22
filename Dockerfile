@@ -1,28 +1,17 @@
-FROM python:3.11-slim as builder
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Instalar dependencias del sistema necesarias para la compilación
+# Instalar dependencias del sistema necesarias
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
-    python3-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar y instalar requerimientos
 COPY backend/requirements.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir wheel setuptools Cython && \
     pip install --no-cache-dir -r requirements.txt
-
-# Segunda etapa: imagen final
-FROM python:3.11-slim
-
-WORKDIR /app
-
-# Copiar los paquetes instalados de la etapa de construcción
-COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 
 # Crear usuario no root
 RUN useradd -m -r appuser && \

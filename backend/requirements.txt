@@ -1,6 +1,7 @@
 # Core API
 fastapi==0.88.0  # Última versión que usa pydantic v1
 uvicorn[standard]==0.20.0
+gunicorn==21.2.0
 
 # Database
 sqlalchemy==2.0.19

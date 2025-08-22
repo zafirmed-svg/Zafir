@@ -18,6 +18,12 @@ app = FastAPI()
 # Set up logging
 import logging
 import os
+import sys
+
+# Add the backend directory to the Python path
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+if backend_dir not in sys.path:
+    sys.path.append(backend_dir)
 
 # Configure logging based on environment
 log_level = logging.DEBUG if os.getenv("ENVIRONMENT") != "production" else logging.INFO

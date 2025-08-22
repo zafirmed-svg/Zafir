@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 import signal
 import sys
+import os
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 from core.database import get_session
@@ -72,12 +73,20 @@ async def root():
     return {"status": "ok", "message": "Zafir Medical API is running"}
 
 # Configurar CORS
+origins = []
+if os.getenv("ENVIRONMENT") == "production":
+    origins = [
+        os.getenv("FRONTEND_URL", ""),  # URL del frontend en producción
+    ]
+else:
+    origins = ["*"]  # En desarrollo, permite todos los orígenes
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Quotes endpoints

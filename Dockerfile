@@ -25,4 +25,4 @@ ENV PORT=8000 \
     PYTHONUNBUFFERED=1
 
 # Comando para iniciar la aplicación
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "main:app"]

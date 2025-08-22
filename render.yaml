@@ -4,16 +4,16 @@ services:
     name: zafir-backend
     env: docker
     dockerfilePath: ./Dockerfile
-    envVars:
-      - key: PORT
-        value: 8000
+    healthCheckPath: /
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: PYTHONPATH
-        value: backend
+        value: /app
       - key: PORT
-        value: 5177
+        value: 8000
+      - key: ENVIRONMENT
+        value: production
 
   # Frontend service
   - type: web

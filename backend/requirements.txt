@@ -1,6 +1,6 @@
 # Core API
-fastapi==0.95.2
-uvicorn[standard]==0.22.0
+fastapi==0.88.0  # Última versión que usa pydantic v1
+uvicorn[standard]==0.20.0
 
 # Database
 sqlalchemy==2.0.19
@@ -8,8 +8,7 @@ pymongo==4.4.1
 
 # Environment and settings
 python-dotenv==0.21.1
-pydantic==1.10.12  # Versión anterior que no requiere Rust
-pydantic-settings==2.0.3
+pydantic==1.10.12
 
 # Authentication
 python-jose[cryptography]==3.3.0

@@ -1,1 +1,7 @@
 -r backend/requirements.txt
+fastapi==0.85.0
+uvicorn==0.18.3
+pydantic==1.9.2
+starlette==0.20.4
+typing-extensions==4.3.0
+s

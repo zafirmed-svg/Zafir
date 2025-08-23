@@ -5,9 +5,13 @@ services:
     env: python
     buildCommand: |
       python -m pip install --upgrade pip
-      pip install "pydantic<2.0.0"
+      pip install typing-extensions==4.3.0
+      pip install pydantic==1.9.2
+      pip install starlette==0.20.4
+      pip install fastapi==0.85.0
+      pip install uvicorn==0.18.3
       pip install -r backend/requirements.txt
-    startCommand: cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT --workers 4
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.4

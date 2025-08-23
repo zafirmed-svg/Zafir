@@ -2,7 +2,8 @@ services:
   # Backend service
   - type: web
     name: zafir-backend
-    env: python
+  env: python
+  pythonVersion: 3.11.4
     buildCommand: pip install --upgrade pip && pip install -r backend/requirements.txt
     startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:

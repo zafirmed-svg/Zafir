@@ -1,25 +1,7 @@
-# Core API
-fastapi==0.85.0
-uvicorn==0.18.3
-pydantic==1.9.2
-typing-extensions==4.3.0
-starlette==0.20.4
-
-# Database
-sqlalchemy==2.0.19
-pymongo==4.4.1
-
-# Environment and settings
+Django==4.2.10
+djangorestframework==3.15.0
+psycopg2-binary==2.9.10
 python-dotenv==0.21.1
-
-# Authentication
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-bcrypt==4.0.1
-
-# Utilities
-python-multipart==0.0.6
-requests==2.31.0
-requests-oauthlib==2.0.0
-email-validator==2.0.0
-dnspython==2.4.1
+pdfplumber==0.7.6
+django-cors-headers==3.15.0
+uvicorn==0.18.3

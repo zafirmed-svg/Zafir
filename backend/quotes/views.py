@@ -131,7 +131,8 @@ def update_quote(request, quote_id):
     quote = get_object_or_404(Quote, pk=quote_id)
     data = request.data.copy()
     data['total_cost'] = float(data.get('facility_fee', quote.facility_fee)) + float(data.get('equipment_costs', quote.equipment_costs)) + float(data.get('anesthesia_fee', quote.anesthesia_fee)) + float(data.get('other_costs', quote.other_costs))
-    serializer = QuoteSerializer(quote, data=data)
+    # allow partial updates so clients can send only fields they want to change
+    serializer = QuoteSerializer(quote, data=data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)

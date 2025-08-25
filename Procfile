@@ -1,1 +1,1 @@
-web: cd backend && PYTHONPATH=./backend uvicorn backend.asgi:application --host 0.0.0.0 --port $PORT
+web: cd backend && PYTHONPATH=./backend gunicorn -k uvicorn.workers.UvicornWorker -c backend/gunicorn_config.py backend.asgi:application

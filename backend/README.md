@@ -54,7 +54,7 @@ backend/
 pip install -r requirements.txt
 
 # Run development server
-uvicorn main:app --reload --host 0.0.0.0 --port 5177
+uvicorn backend.asgi:application --reload --host 0.0.0.0 --port 5177
 ```
 
 ## Production
